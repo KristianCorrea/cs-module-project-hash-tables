@@ -94,8 +94,19 @@ class HashTable:
         """
         # Your code here
         index = self.hash_index(key)
-        self.storage[index] = value
-
+        current_storage_in_index = self.storage[index]
+        
+        if current_storage_in_index:
+            while current_storage_in_index.next != None and current_storage_in_index.key != key:
+                current_storage_in_index = current_storage_in_index.next
+            if current_storage_in_index.key == key:
+                current_storage_in_index.value = value
+            else:
+                current_storage_in_index.next = HashTableEntry(key, value)
+                self.item_count += 1
+        else:
+            self.storage[index] = HashTableEntry(key, value)
+            self.item_count +=1
 
     def delete(self, key):
         """
@@ -108,7 +119,17 @@ class HashTable:
         # Your code here
 
         index = self.hash_index(key)
-        self.storage[index] = None
+        current_storage_in_index = self.storage[index]
+
+        if current_storage_in_index is None:
+            return
+        while current_storage_in_index:
+            if current_storage_in_index.key == key:
+                self.storage[index] = current_storage_in_index.next
+                self.item_count -= 1
+            current_storage_in_index = current_storage_in_index.next
+
+        return None
 
 
     def get(self, key):
@@ -122,7 +143,15 @@ class HashTable:
         # Your code here
 
         index = self.hash_index(key)
-        return self.storage[index]
+        current_storage_in_index = self.storage[index]
+
+        while current_storage_in_index:
+            if current_storage_in_index.key == key:
+                return current_storage_in_index.value
+            
+            current_storage_in_index = current_storage_in_index.next
+        
+        return None
 
     def resize(self, new_capacity):
         """
@@ -133,6 +162,20 @@ class HashTable:
         """
         # Your code here
 
+        new_table = HashTable(new_capacity)
+
+        for i in self.storage:
+            if i != None and i.next == None:
+                new_table.put(i.key, i.value)
+            else:
+                cur_node = i
+                while cur_node != None:
+                    new_table.put(cur_node.key, cur_node.value)
+                    cur_node = cur_node.next
+
+        self.capacity = new_table.capacity
+        self.storage = new_table.storage
+        self.item_count = new_table.item_count
 
 
 if __name__ == "__main__":
